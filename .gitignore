@@ -1,0 +1,13 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Runtime data — these are state, not code
+clipboard.txt
+history.json
+
+# TLS certs (from the Tailscale HTTPS work)
+*.crt
+*.key
+*.pem

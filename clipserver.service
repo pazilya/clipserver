@@ -1,0 +1,12 @@
+[Unit]
+Description=Clipboard Server
+After=network.target
+
+[Service]
+ExecStart=/home/pi/clipserver/venv/bin/python /home/pi/clipserver/app.py
+WorkingDirectory=/home/pi/clipserver
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
