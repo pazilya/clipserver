@@ -6,7 +6,7 @@
 
 _CLIP_FILE="/home/pi/clipserver/clipboard.txt"
 _HIST_FILE="/home/pi/clipserver/history.json"
-_CLIP_SERVER="http://pizero:5000"
+_CLIP_SERVER="https://pizero.tailea2095.ts.net:5000"
 
 _on_pi() {
   [[ "$(hostname)" == "pizero" ]]

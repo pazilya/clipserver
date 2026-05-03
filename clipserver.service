@@ -1,8 +1,11 @@
 [Unit]
 Description=Clipboard Server
-After=network.target
+After=network.target tailscaled.service
 
 [Service]
+# Fix cert ownership before starting so User=pi can read them.
+# The + prefix runs only this line as root, even though the service runs as pi.
+ExecStartPre=+chown -R pi:pi /home/pi/clipserver/certs
 ExecStart=/home/pi/clipserver/venv/bin/python /home/pi/clipserver/app.py
 WorkingDirectory=/home/pi/clipserver
 Restart=always

@@ -4,8 +4,11 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
-CLIP_FILE = os.path.join(os.path.dirname(__file__), "clipboard.txt")
-HISTORY_FILE = os.path.join(os.path.dirname(__file__), "history.json")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CLIP_FILE = os.path.join(BASE_DIR, "clipboard.txt")
+HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
+CERT_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.crt")
+KEY_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.key")
 
 def append_history(text):
     try:
@@ -195,4 +198,4 @@ def post_clip():
     return "OK", 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, ssl_context=(CERT_FILE, KEY_FILE))
