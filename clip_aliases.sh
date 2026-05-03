@@ -12,13 +12,14 @@ _on_pi() {
   [[ "$(hostname)" == "pizero" ]]
 }
 
-# Append an entry to history.json; reads text from stdin to handle any content safely
+# Append an entry to history.json; text is passed via $CLIP_TEXT env var
+# (stdin is occupied by the heredoc script, so env var avoids the conflict)
 _pi_append_history() {
-  python3 - "$_HIST_FILE" <<'PYEOF'
-import sys, json
+  CLIP_TEXT="$1" python3 - "$_HIST_FILE" <<'PYEOF'
+import sys, json, os
 from datetime import datetime, timezone
 path = sys.argv[1]
-text = sys.stdin.read()
+text = os.environ['CLIP_TEXT']
 try:
     with open(path) as f:
         history = json.load(f)
@@ -47,7 +48,7 @@ clip-push() {
 
   if _on_pi; then
     printf '%s' "$text" > "$_CLIP_FILE"
-    printf '%s' "$text" | _pi_append_history
+    _pi_append_history "$text"
     echo "$text"
     echo "Pushed (local)."
   else
