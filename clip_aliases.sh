@@ -80,3 +80,62 @@ clip-pull() {
     fi
   fi
 }
+
+# History: list recent entries (newest first) or re-push entry N
+# Usage: clip-history          (shows last 15)
+#        clip-history N        (re-pushes entry N to current clipboard)
+clip-history() {
+  local raw
+
+  if _on_pi; then
+    raw="$(python3 - "$_HIST_FILE" <<'PYEOF'
+import sys, json
+try:
+    with open(sys.argv[1]) as f:
+        data = json.load(f)
+except (FileNotFoundError, ValueError):
+    data = []
+print(json.dumps(list(reversed(data))))
+PYEOF
+)"
+  else
+    raw="$(curl -s "$_CLIP_SERVER/api/history")"
+  fi
+
+  if [[ -n "$1" ]] && [[ "$1" =~ ^[1-9][0-9]*$ ]]; then
+    local text
+    text="$(python3 -c '
+import sys, json
+try:
+    data = json.loads(sys.stdin.read())
+except ValueError:
+    data = []
+idx = int(sys.argv[1]) - 1
+if 0 <= idx < len(data):
+    sys.stdout.write(data[idx]["text"])
+else:
+    print("No entry " + sys.argv[1] + ".", file=sys.stderr)
+    sys.exit(1)
+' "$1" <<< "$raw")"
+    [[ $? -ne 0 ]] && return 1
+    printf '%s' "$text" | clip-push
+    return
+  fi
+
+  python3 -c '
+import sys, json
+try:
+    data = json.loads(sys.stdin.read())
+except ValueError:
+    data = []
+if not data:
+    print("(no history)")
+else:
+    for i, e in enumerate(data[:15], 1):
+        ts = e.get("timestamp", "")[:16].replace("T", " ")
+        text = e.get("text", "").replace("\n", "\u21b5")
+        if len(text) > 72:
+            text = text[:72] + "\u2026"
+        print(f"{i:>3}  [{ts}]  {text}")
+' <<< "$raw"
+}
