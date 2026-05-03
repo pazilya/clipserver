@@ -11,6 +11,8 @@ HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 CERT_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.crt")
 KEY_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.key")
 ICONS_DIR = os.path.join(BASE_DIR, "icons")
+ICONS_DARK_DIR = os.path.join(ICONS_DIR, "dark")
+ICONS_LIGHT_DIR = os.path.join(ICONS_DIR, "light")
 PAGE_SIZE = 25
 CENTRAL = ZoneInfo("America/Chicago")
 
@@ -42,7 +44,8 @@ HTML = """
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clipboard</title>
-  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" href="/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -162,7 +165,10 @@ HTML = """
 <body>
   <div class="topbar">
     <div class="topbar-left">
-      <img src="/icon-256.png" alt="Clipboard">
+      <picture>
+        <source srcset="/icon-256-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="/icon-256-light.png" alt="Clipboard">
+      </picture>
       <h1>Clipboard</h1>
     </div>
     <a class="nav-link" href="/history">History →</a>
@@ -222,7 +228,8 @@ HISTORY_HTML = """
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clipboard History</title>
-  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" href="/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -414,12 +421,22 @@ HISTORY_HTML = """
 
 @app.route("/favicon.ico")
 @app.route("/favicon.png")
-def favicon():
-    return send_from_directory(ICONS_DIR, "clipboard_favicon_32.png", mimetype="image/png")
+@app.route("/favicon-dark.png")
+def favicon_dark():
+    return send_from_directory(ICONS_DARK_DIR, "clipboard_favicon_32.png", mimetype="image/png")
+
+@app.route("/favicon-light.png")
+def favicon_light():
+    return send_from_directory(ICONS_LIGHT_DIR, "clipboard_favicon_32.png", mimetype="image/png")
 
 @app.route("/icon-256.png")
-def icon_256():
-    return send_from_directory(ICONS_DIR, "clipboard_header_256.png", mimetype="image/png")
+@app.route("/icon-256-dark.png")
+def icon_256_dark():
+    return send_from_directory(ICONS_DARK_DIR, "clipboard_header_256.png", mimetype="image/png")
+
+@app.route("/icon-256-light.png")
+def icon_256_light():
+    return send_from_directory(ICONS_LIGHT_DIR, "clipboard_header_256.png", mimetype="image/png")
 
 def read_clip():
     try:
