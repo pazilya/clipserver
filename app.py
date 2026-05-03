@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, send_from_directory
 import os
 import json
 from datetime import datetime, timezone
@@ -10,6 +10,7 @@ CLIP_FILE = os.path.join(BASE_DIR, "clipboard.txt")
 HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 CERT_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.crt")
 KEY_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.key")
+ICONS_DIR = os.path.join(BASE_DIR, "icons")
 PAGE_SIZE = 25
 CENTRAL = ZoneInfo("America/Chicago")
 
@@ -41,6 +42,7 @@ HTML = """
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clipboard</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -60,6 +62,15 @@ HTML = """
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1.5rem;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .topbar-left img {
+      width: 36px;
+      height: 36px;
     }
     h1 {
       font-size: 1.3rem;
@@ -150,7 +161,10 @@ HTML = """
 </head>
 <body>
   <div class="topbar">
-    <h1>📋 Clipboard</h1>
+    <div class="topbar-left">
+      <img src="/icon-256.png" alt="Clipboard">
+      <h1>Clipboard</h1>
+    </div>
     <a class="nav-link" href="/history">History →</a>
   </div>
 
@@ -208,6 +222,7 @@ HISTORY_HTML = """
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clipboard History</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -396,6 +411,15 @@ HISTORY_HTML = """
 </html>
 """
 
+
+@app.route("/favicon.ico")
+@app.route("/favicon.png")
+def favicon():
+    return send_from_directory(ICONS_DIR, "clipboard_favicon_32.png", mimetype="image/png")
+
+@app.route("/icon-256.png")
+def icon_256():
+    return send_from_directory(ICONS_DIR, "clipboard_header_256.png", mimetype="image/png")
 
 def read_clip():
     try:
