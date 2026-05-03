@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, render_template_string
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -10,6 +11,14 @@ HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 CERT_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.crt")
 KEY_FILE = os.path.join(BASE_DIR, "certs", "pizero.tailea2095.ts.net.key")
 PAGE_SIZE = 25
+CENTRAL = ZoneInfo("America/Chicago")
+
+def fmt_timestamp(ts_str):
+    try:
+        dt = datetime.fromisoformat(ts_str).replace(tzinfo=timezone.utc)
+        return dt.astimezone(CENTRAL).strftime("%Y-%m-%d %H:%M CT")
+    except Exception:
+        return ts_str[:16]
 
 def append_history(text):
     try:
@@ -341,7 +350,7 @@ HISTORY_HTML = """
     {% for entry in entries %}
     <div class="entry">
       <div class="entry-meta">
-        <span class="timestamp">{{ entry.timestamp[:16].replace('T', ' ') }} UTC</span>
+        <span class="timestamp">{{ entry.display_ts }}</span>
         {% if entry.source == 'pi-local' %}
           <span class="badge badge-pi">Pi</span>
         {% else %}
@@ -441,6 +450,8 @@ def history_page():
     page = max(1, min(page, total_pages))
     start = (page - 1) * PAGE_SIZE
     entries = history[start:start + PAGE_SIZE]
+    for e in entries:
+        e["display_ts"] = fmt_timestamp(e.get("timestamp", ""))
     return render_template_string(HISTORY_HTML, entries=entries, page=page, total_pages=total_pages)
 
 if __name__ == "__main__":

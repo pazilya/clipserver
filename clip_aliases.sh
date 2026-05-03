@@ -48,10 +48,12 @@ clip-push() {
   if _on_pi; then
     printf '%s' "$text" > "$_CLIP_FILE"
     printf '%s' "$text" | _pi_append_history
+    echo "$text"
     echo "Pushed (local)."
   else
     printf '%s' "$text" | curl -s -X POST "$_CLIP_SERVER/clip" \
       -H 'Content-Type: text/plain' --data-binary @- > /dev/null
+    echo "$text"
     echo "Pushed."
   fi
 }
@@ -124,6 +126,12 @@ else:
 
   python3 -c '
 import sys, json
+from datetime import datetime, timezone
+try:
+    from zoneinfo import ZoneInfo
+    central = ZoneInfo("America/Chicago")
+except Exception:
+    central = None
 try:
     data = json.loads(sys.stdin.read())
 except ValueError:
@@ -132,10 +140,25 @@ if not data:
     print("(no history)")
 else:
     for i, e in enumerate(data[:15], 1):
-        ts = e.get("timestamp", "")[:16].replace("T", " ")
+        ts_raw = e.get("timestamp", "")
+        try:
+            dt = datetime.fromisoformat(ts_raw).replace(tzinfo=timezone.utc)
+            if central:
+                dt = dt.astimezone(central)
+            ts = dt.strftime("%Y-%m-%d %H:%M CT")
+        except Exception:
+            ts = ts_raw[:16]
         text = e.get("text", "").replace("\n", "\u21b5")
         if len(text) > 72:
             text = text[:72] + "\u2026"
         print(f"{i:>3}  [{ts}]  {text}")
 ' <<< "$raw"
+}
+
+clip-restart() {
+  if ! _on_pi; then
+    echo "clip-restart only works on the Pi." >&2
+    return 1
+  fi
+  sudo systemctl restart clipserver && sudo systemctl status clipserver --no-pager
 }
