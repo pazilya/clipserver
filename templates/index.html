@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clipboard</title>
+  <link rel="icon" href="/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <picture>
+        <source srcset="/icon-256-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="/icon-256-light.png" alt="Clipboard">
+      </picture>
+      <h1>Clipboard</h1>
+    </div>
+    <a class="nav-link" href="/history">History →</a>
+  </div>
+
+  <div class="card">
+    <label>Push new text</label>
+    <textarea id="pushText" placeholder="Paste something here..."></textarea>
+    <button class="btn-push" onclick="pushClip()">Push</button>
+  </div>
+
+  <div class="current-card">
+    <label>Current clipboard</label>
+    <div class="current-text" id="currentText">{{ current }}</div>
+    <button class="btn-copy" onclick="copyToClipboard()">Copy to device clipboard</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>

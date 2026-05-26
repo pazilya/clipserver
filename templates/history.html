@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clipboard History</title>
+  <link rel="icon" href="/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+</head>
+<body>
+  <div class="topbar">
+    <h1>History</h1>
+    <a class="nav-link" href="/">← Clipboard</a>
+  </div>
+
+  {% if entries %}
+    {% for entry in entries %}
+    <div class="entry">
+      <div class="entry-meta">
+        <span class="timestamp">{{ entry.display_ts }}</span>
+        {% if entry.source == 'pi-local' %}
+          <span class="badge badge-pi">Pi</span>
+        {% else %}
+          <span class="badge badge-http">HTTP</span>
+        {% endif %}
+      </div>
+      <div class="entry-text">{{ entry.text }}</div>
+      <button class="btn-copy" onclick="copyEntry({{ entry.text | tojson }})">Copy</button>
+    </div>
+    {% endfor %}
+
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="/history?page={{ page - 1 }}">← Prev</a>
+      {% endif %}
+      <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+      {% if page < total_pages %}
+        <a href="/history?page={{ page + 1 }}">Next →</a>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="empty">No history yet.</p>
+  {% endif %}
+
+  <div class="toast" id="toast"></div>
+
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+</body>
+</html>

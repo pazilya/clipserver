@@ -1,0 +1,72 @@
+.card {
+  background: #1e2130;
+  border: 1px solid #2d3148;
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+textarea {
+  width: 100%;
+  min-height: 130px;
+  background: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 0.75rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+textarea:focus { border-color: #6366f1; }
+
+button {
+  width: 100%;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  transition: opacity 0.2s;
+}
+
+button:active { opacity: 0.75; }
+
+.btn-push { background: #6366f1; color: #fff; }
+.btn-copy { background: #1e2130; border: 1px solid #2d3148; color: #94a3b8; }
+
+.current-card {
+  background: #1e2130;
+  border: 1px solid #2d3148;
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 480px;
+}
+
+.current-text {
+  background: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  word-break: break-word;
+  white-space: pre-wrap;
+  min-height: 60px;
+}
