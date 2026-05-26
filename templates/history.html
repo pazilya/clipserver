@@ -27,7 +27,10 @@
         {% endif %}
       </div>
       <div class="entry-text">{{ entry.text }}</div>
-      <button class="btn-copy" onclick="copyEntry({{ entry.text | tojson }})">Copy</button>
+      <div class="entry-actions">
+        <button class="btn-copy" onclick="copyEntry({{ entry.text | tojson }})">Copy</button>
+        <button class="btn-delete" onclick="deleteEntry({{ entry.idx }})">Delete</button>
+      </div>
     </div>
     {% endfor %}
 

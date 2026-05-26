@@ -102,7 +102,9 @@ def history_page():
             history = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         history = []
-    history = list(reversed(history))
+    for i, e in enumerate(history):
+        e["idx"] = i
+    history.reverse()
     total = len(history)
     total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
     page = request.args.get("page", 1, type=int)
@@ -112,6 +114,20 @@ def history_page():
     for e in entries:
         e["display_ts"] = fmt_timestamp(e.get("timestamp", ""))
     return render_template("history.html", entries=entries, page=page, total_pages=total_pages)
+
+@app.route("/api/history/<int:index>", methods=["DELETE"])
+def delete_history_entry(index):
+    try:
+        with open(HISTORY_FILE, "r") as f:
+            history = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return "Not found", 404
+    if index < 0 or index >= len(history):
+        return "Not found", 404
+    history.pop(index)
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2)
+    return "OK", 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, ssl_context=(CERT_FILE, KEY_FILE))
