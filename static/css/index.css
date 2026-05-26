@@ -69,4 +69,6 @@ button:active { opacity: 0.75; }
   word-break: break-word;
   white-space: pre-wrap;
   min-height: 60px;
+  max-height: 200px;
+  overflow-y: auto;
 }
