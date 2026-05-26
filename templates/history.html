@@ -34,12 +34,12 @@
         {% else %}
           <span class="badge badge-http">HTTP</span>
         {% endif %}
-        <button class="btn-delete" onclick="deleteEntry({{ entry.idx }})" aria-label="Delete entry">
+        <button class="btn-delete" data-idx="{{ entry.idx }}" aria-label="Delete entry">
           <svg width="16" height="16"><use href="#icon-trash"/></svg>
         </button>
       </div>
       <div class="entry-text">{{ entry.text }}</div>
-      <button class="btn-copy" onclick="copyEntry({{ entry.text | tojson }})">Copy</button>
+      <button class="btn-copy">Copy</button>
     </div>
     {% endfor %}
 
