@@ -23,19 +23,26 @@ def fmt_timestamp(ts_str):
     except Exception:
         return ts_str[:16]
 
-def append_history(text):
+def load_history():
     try:
         with open(HISTORY_FILE, "r") as f:
-            history = json.load(f)
+            return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        history = []
+        return []
+
+def save_history(history):
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2)
+
+def append_history(text):
+    history = load_history()
     history.append({
         "text": text,
         "timestamp": datetime.utcnow().isoformat(),
         "source": "http-post",
+        "favorite": False,
     })
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=2)
+    save_history(history)
 
 @app.route("/favicon.ico")
 @app.route("/favicon.png")
@@ -69,7 +76,19 @@ def write_clip(text):
 
 @app.route("/")
 def index():
-    return render_template("index.html", current=read_clip())
+    current = read_clip()
+    history = load_history()
+    current_idx = None
+    current_favorite = False
+    if history and history[-1].get("text") == current:
+        current_idx = len(history) - 1
+        current_favorite = history[-1].get("favorite", False)
+    return render_template(
+        "index.html",
+        current=current,
+        current_idx=current_idx,
+        current_favorite=current_favorite,
+    )
 
 @app.route("/clip", methods=["GET"])
 def get_clip():
@@ -84,11 +103,7 @@ def post_clip():
 
 @app.route("/api/history")
 def api_history():
-    try:
-        with open(HISTORY_FILE, "r") as f:
-            history = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        history = []
+    history = load_history()
     limit = request.args.get("limit", type=int)
     history = list(reversed(history))
     if limit is not None:
@@ -97,14 +112,11 @@ def api_history():
 
 @app.route("/history")
 def history_page():
-    try:
-        with open(HISTORY_FILE, "r") as f:
-            history = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        history = []
+    history = load_history()
     for i, e in enumerate(history):
         e["idx"] = i
     history.reverse()
+    history.sort(key=lambda e: not e.get("favorite", False))
     total = len(history)
     total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
     page = request.args.get("page", 1, type=int)
@@ -117,17 +129,21 @@ def history_page():
 
 @app.route("/api/history/<int:index>", methods=["DELETE"])
 def delete_history_entry(index):
-    try:
-        with open(HISTORY_FILE, "r") as f:
-            history = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return "Not found", 404
+    history = load_history()
     if index < 0 or index >= len(history):
         return "Not found", 404
     history.pop(index)
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=2)
+    save_history(history)
     return "OK", 200
+
+@app.route("/api/history/<int:index>/favorite", methods=["POST"])
+def toggle_favorite(index):
+    history = load_history()
+    if index < 0 or index >= len(history):
+        return "Not found", 404
+    history[index]["favorite"] = not history[index].get("favorite", False)
+    save_history(history)
+    return jsonify({"favorite": history[index]["favorite"]})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, ssl_context=(CERT_FILE, KEY_FILE))

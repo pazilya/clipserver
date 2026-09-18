@@ -9,6 +9,19 @@ async function pushClip() {
   }
 }
 
+async function toggleFavoriteCurrent() {
+  const btn = document.getElementById('favoriteCurrentBtn');
+  if (!btn || !btn.dataset.idx) return;
+  const res = await fetch('/api/history/' + btn.dataset.idx + '/favorite', { method: 'POST' });
+  if (res.ok) {
+    const data = await res.json();
+    btn.classList.toggle('active', data.favorite);
+    showToast(data.favorite ? 'Favorited ✓' : 'Unfavorited');
+  } else {
+    showToast('Favorite failed');
+  }
+}
+
 async function copyToClipboard() {
   const text = document.getElementById('currentText').textContent;
   try {

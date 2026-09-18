@@ -8,6 +8,10 @@
   margin-bottom: 0.75rem;
 }
 
+.entry.is-favorite {
+  border-color: #f43f5e;
+}
+
 .entry-meta {
   display: flex;
   align-items: center;
@@ -78,6 +82,25 @@
 .btn-delete:hover { color: #f87171; background: rgba(248, 113, 113, 0.1); }
 .btn-delete:active { opacity: 0.7; }
 .btn-delete svg { display: block; }
+
+.btn-favorite {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.btn-favorite:hover { color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
+.btn-favorite:active { opacity: 0.7; }
+.btn-favorite svg { display: block; }
+.btn-favorite.active { color: #f43f5e; }
+.btn-favorite.active svg { fill: currentColor; }
 
 .pagination {
   display: flex;

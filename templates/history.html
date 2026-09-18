@@ -17,6 +17,9 @@
       <path d="M10 11v6M14 11v6"/>
       <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
     </symbol>
+    <symbol id="icon-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </symbol>
   </svg>
 
   <div class="topbar">
@@ -26,7 +29,7 @@
 
   {% if entries %}
     {% for entry in entries %}
-    <div class="entry">
+    <div class="entry {{ 'is-favorite' if entry.favorite else '' }}">
       <div class="entry-meta">
         <span class="timestamp">{{ entry.display_ts }}</span>
         {% if entry.source == 'pi-local' %}
@@ -34,6 +37,9 @@
         {% else %}
           <span class="badge badge-http">HTTP</span>
         {% endif %}
+        <button class="btn-favorite {{ 'active' if entry.favorite else '' }}" data-idx="{{ entry.idx }}" aria-label="Favorite entry">
+          <svg width="16" height="16"><use href="#icon-heart"/></svg>
+        </button>
         <button class="btn-delete" data-idx="{{ entry.idx }}" aria-label="Delete entry">
           <svg width="16" height="16"><use href="#icon-trash"/></svg>
         </button>

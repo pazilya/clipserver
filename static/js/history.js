@@ -7,6 +7,14 @@ document.querySelectorAll('.entry .btn-copy').forEach(btn => {
   });
 });
 
+document.querySelectorAll('.entry .btn-favorite').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const res = await fetch('/api/history/' + btn.dataset.idx + '/favorite', { method: 'POST' });
+    if (res.ok) location.reload();
+    else showToast('Favorite failed');
+  });
+});
+
 document.querySelectorAll('.entry .btn-delete').forEach(btn => {
   btn.addEventListener('click', async () => {
     if (!confirm('Delete this entry?')) return;

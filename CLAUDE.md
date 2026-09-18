@@ -8,11 +8,15 @@ A cross-device clipboard sharing server designed to run on a Raspberry Pi Zero, 
 
 ## Architecture
 
-- **`app.py`** — Flask server exposing three endpoints:
-  - `GET /` — Web UI (mobile-friendly, dark-themed, inline HTML/CSS/JS via `render_template_string`)
+- **`app.py`** — Flask server. Templates live in `templates/`, styles/scripts in `static/css`/`static/js` (dark-themed, mobile-friendly).
+  - `GET /` — Push clipboard UI; also shows the current clipboard with a favorite toggle
   - `GET /clip` — Returns current clipboard as plain text
   - `POST /clip` — Stores new clipboard text (body is raw `text/plain`)
-  - Clipboard is persisted to `clipboard.txt`; push history is appended to `history.json`
+  - `GET /history` — Paginated history UI; favorited entries are sorted to the top
+  - `GET /api/history` — JSON history, newest first (optional `limit`)
+  - `DELETE /api/history/<index>` — Removes a history entry
+  - `POST /api/history/<index>/favorite` — Toggles an entry's favorite/pin status
+  - Clipboard is persisted to `clipboard.txt`; push history is appended to `history.json`, each entry carrying a `favorite` bool (missing on legacy entries = not favorited)
 
 - **`clip_aliases.sh`** — Shell functions for the laptop client (`clip-push`, `clip-pull`). Uses `curl` to talk to `http://pizero:5000`. Uses `wl-copy` (Wayland) for auto-copy on pull.
 
@@ -61,9 +65,22 @@ echo "piped text" | clip-push
 clip-pull
 ```
 
+## TLS Certificates
+
+The Flask app reads its cert and key from `clipserver/certs/` (gitignored — not in this repo).
+
+- **Source**: `tailscale cert` for the domain `pizero.tailea2095.ts.net`. This issues a Let's Encrypt certificate, valid 90 days.
+- **Must run on the Pi itself** — Tailscale verifies node ownership before issuing, so this can't be done from another machine.
+- **`renew-cert.sh`** — reads the current cert's expiry, requests a renewal via `tailscale cert --min-validity 720h` (writing `certs/pizero.tailea2095.ts.net.crt`/`.key`), then compares expiry before/after. If the cert actually changed, it restarts `clipserver.service` so the running server picks up the new cert, and logs the renewal.
+- **Root crontab** on the Pi runs it daily:
+  ```
+  35 5 * * * /home/pi/clipserver/renew-cert.sh >> /home/pi/logs/cert-renew.log 2>&1
+  ```
+  Since `tailscale cert` only issues a new cert once within `--min-validity` of expiry, most daily runs are no-ops (no expiry change, no restart) — the 90-day cert only actually renews (and restarts the service) periodically.
+
 ## Key Notes
 
 - The Pi is assumed to be reachable at hostname `pizero` over Tailscale on port 5000.
-- The web UI is a single inline HTML string in `app.py` — no template files or static assets.
-- `history.json` is append-only; `clipboard.txt` holds only the latest entry.
+- `history.json` entries are never reordered on disk; favorite-first ordering is applied only when rendering `/history`. `clipboard.txt` holds only the latest entry.
+- The home page's favorite toggle only appears when the current clipboard text matches the most recent history entry (i.e. it was pushed via `/clip`, not written some other way).
 - `clip_aliases.sh` defaults to Wayland (`wl-copy`); for X11 environments swap in `xclip`.
