@@ -146,4 +146,8 @@ def toggle_favorite(index):
     return jsonify({"favorite": history[index]["favorite"]})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, ssl_context=(CERT_FILE, KEY_FILE))
+    if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
+        app.run(host="0.0.0.0", port=5000, ssl_context=(CERT_FILE, KEY_FILE))
+    else:
+        print("No certs found — starting in HTTP mode")
+        app.run(host="0.0.0.0", port=5000)
